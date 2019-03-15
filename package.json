@@ -18,11 +18,13 @@
     "ts-node": "^8.0.3",
     "tslint": "^5.14.0",
     "tslint-microsoft-contrib": "^6.1.0",
-    "typescript": "^3.3.3333"
+    "typescript": "^3.3.3333",
+    "@types/request": "2.47.0"
   },
   "dependencies": {
     "express": "^4.16.4",
     "fast-csv": "2.4.1",
-    "csv-parser": "2.2.0"
+    "csv-parser": "2.2.0",
+    "request": "2.88.0"
   }
 }

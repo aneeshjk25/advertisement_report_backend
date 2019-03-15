@@ -1,6 +1,7 @@
 {
     "rulesDirectory": ["node_modules/tslint-microsoft-contrib"],
     "rules": {
-        
+        "no-shadowed-variable": true,
+        "newline-before-return": true
     }
 }
