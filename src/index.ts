@@ -1,7 +1,8 @@
 import express from 'express';
 import csv from 'csv-parser';
-import fs from 'fs';
+import fs, { access } from 'fs';
 import request from 'request';
+import * as _ from 'lodash';
 const ip = '127.0.0.1';
 const app = express();
 const port = 3000;
@@ -16,7 +17,7 @@ interface Campaign {
     advertiser_id: number,
     name: string,
     cost_model: 'per_impression' | 'per_click'| 'per_install',
-    cost: string
+    cost: number
 }
 interface AdvertisersCampaigns {
     name: string,
@@ -42,6 +43,7 @@ app.get('/advertisers_campaigns', (req, res) => {
         fs.createReadStream(__dirname + '/../data/campaigns.csv')
         .pipe(csv())
         .on('data', function(data: Campaign){
+            data.cost = parseFloat(data.cost as unknown as string);
             campaigns.push(data);
         })
         .on('end',function(){
@@ -55,9 +57,10 @@ app.get('/advertisers_campaigns', (req, res) => {
                 campaigns
                     .filter(campaign => campaign.advertiser_id === advertiser.id)
                     .reduce((aC, campaign) => {
-                        aC.cost += parseFloat(campaign.cost);
+                        aC.cost += campaign.cost;
+                        aC.cost = _.round(aC.cost, 2);
                         aC.number_of_campaigns++;
-                        
+
                         return aC;
                     }, advertisementCampaign)
 
