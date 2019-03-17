@@ -1,73 +1,69 @@
 import express from 'express';
-import csv from 'csv-parser';
-import fs, { access } from 'fs';
 import request from 'request';
-import * as _ from 'lodash';
+
+import { Report } from './models/csv/Report';
+import { advertisersController, campaignsController, reportsController } from './controllers/data';
+import { Advertiser } from './models/csv/Advertiser';
+import { AdvertisersCampaign } from './models/response/AdvertisersCampaign';
+import { round } from 'lodash';
+import { Campaign } from './models/csv/Campaign';
+import { AdvertisersCampaignsReport } from './models/response/AdvertisersCampaignsReport';
+
 const ip = '127.0.0.1';
 const app = express();
 const port = 3000;
-const api_url = 'http://' + ip + ':' + port;
-
-interface Advertiser {
-    id: number,
-    name: string
-}
-interface Campaign {
-    id: number,
-    advertiser_id: number,
-    name: string,
-    cost_model: 'per_impression' | 'per_click'| 'per_install',
-    cost: number
-}
-interface AdvertisersCampaigns {
-    name: string,
-    cost: number,
-    number_of_campaigns: number
-}
-
-app.get('/advertisers', (req, res) =>{
-    const results: Advertiser[] = [];
-    fs.createReadStream(__dirname + '/../data/advertisers.csv')
-    .pipe(csv())
-    .on('data', function(data: Advertiser){
-        results.push(data);
-    })
-    .on('end',function(){
-        res.json(results);
-    });  
-})
+export const api_url = 'http://' + ip + ':' + port;
+app.get('/data/advertisers', advertisersController);
+app.get('/data/campaigns', campaignsController);
+app.get('/data/reports', reportsController);
 
 app.get('/advertisers_campaigns', (req, res) => {
-    request({ url : api_url + '/advertisers', json: true}, (error, r, advertisers: Advertiser[]) =>  {
-        const campaigns: Campaign[] = [];
-        fs.createReadStream(__dirname + '/../data/campaigns.csv')
-        .pipe(csv())
-        .on('data', function(data: Campaign){
-            data.cost = parseFloat(data.cost as unknown as string);
-            campaigns.push(data);
-        })
-        .on('end',function(){
-            const advertisementCampaigns = advertisers.map((advertiser) => {
-                const advertisementCampaign:AdvertisersCampaigns = {
-                    name : advertiser.name,
-                    cost: 0,
-                    number_of_campaigns: 0
-                };
+    request.get({ url: api_url + '/data/reports', json: true }, (e, r, reports: Report[]) => {
+        request.get({ url: api_url + '/data/advertisers', json: true }, (er, rs, advertisers: Advertiser[]) => {
+            const advertisersCampaigns = advertisers.map((advertiser) => {
+                const advertisersCampaign: AdvertisersCampaign = {
+                    name: advertiser.name,
+                    number_of_campaigns: 0,
+                    cost: 0
+                }
+                reports
+                    .filter(report => report.advertiser_id == advertiser.id)
+                    .forEach((report) => {
+                        advertisersCampaign.number_of_campaigns++;
+                        advertisersCampaign.cost += report.cost;
+                        advertisersCampaign.cost = round(advertisersCampaign.cost, 2);
+                    })
 
-                campaigns
-                    .filter(campaign => campaign.advertiser_id === advertiser.id)
-                    .reduce((aC, campaign) => {
-                        aC.cost += campaign.cost;
-                        aC.cost = _.round(aC.cost, 2);
-                        aC.number_of_campaigns++;
-
-                        return aC;
-                    }, advertisementCampaign)
-
-                return advertisementCampaign;
+                return advertisersCampaign;
             })
-            res.send(advertisementCampaigns);
-        });  
+            res.send(advertisersCampaigns);
+        })
+    })
+})
+
+app.get('/advertisers_campaigns_reports', (req, res) => {
+    request.get({ url: api_url + '/data/reports', json: true }, (e, r, reports: Report[]) => {
+        request.get({ url: api_url + '/data/campaigns', json: true }, (er, rs, campaigns: Campaign[]) => {
+            const advertisersCampaignsReports = campaigns.map((campaign) => {
+                const advertisersCampaignsReport: AdvertisersCampaignsReport = {
+                    advertiser_id: campaign.advertiser_id,
+                    advertiser_name: campaign.advertiser_name,
+                    campaign_id: campaign.id,
+                    campaign_name: campaign.name,
+                    cost: 0,
+                };
+                reports
+                    .filter(report => report.campaign_id === campaign.id)
+                    .forEach((report) => {
+                        advertisersCampaignsReport.cost += report.cost;
+                        advertisersCampaignsReport.cost = round(advertisersCampaignsReport.cost, 2);
+                    })
+
+                return advertisersCampaignsReport
+            })
+
+            res.send(advertisersCampaignsReports);
+        })
     })
 })
 
