@@ -11,7 +11,7 @@ import { AdvertisersCampaignsReport } from './models/response/AdvertisersCampaig
 
 const ip = '127.0.0.1';
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 export const api_url = 'http://' + ip + ':' + port;
 app.get('/data/advertisers', advertisersController);
 app.get('/data/campaigns', campaignsController);
