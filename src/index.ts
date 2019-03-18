@@ -21,14 +21,15 @@ app.get('/advertisers_campaigns', (req, res) => {
     request.get({ url: api_url + '/data/reports', json: true }, (e, r, reports: Report[]) => {
         request.get({ url: api_url + '/data/advertisers', json: true }, (er, rs, advertisers: Advertiser[]) => {
             const advertisersCampaigns = advertisers.map((advertiser) => {
-                const advertisersCampaign: AdvertisersCampaign = {
+                const advertisersCampaign = {
                     name: advertiser.name,
                     number_of_campaigns: 0,
-                    cost: 0
-                }
+                    cost: 0,
+                } as AdvertisersCampaign;
                 reports
                     .filter(report => report.advertiser_id == advertiser.id)
                     .forEach((report) => {
+                        advertisersCampaign.advertiser_id = report.advertiser_id;
                         advertisersCampaign.number_of_campaigns++;
                         advertisersCampaign.cost += report.cost;
                         advertisersCampaign.cost = round(advertisersCampaign.cost, 2);
