@@ -12,3 +12,6 @@
  - `/data/reports` gives a list of reports
  - `/advertisers_campaigns` returns list of campaign expenses for every advertisers
  - `/advertisers_campaigns_reports`  returns a list of expenses for every campaign augmented with advertiser data
+
+ ## Demo
+ Live preview https://aneesh-advertisement-report.herokuapp.com/
