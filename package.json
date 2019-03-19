@@ -12,17 +12,18 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+
+  },
+  "dependencies": {
+    "ts-node": "^8.0.3",
+    "typescript": "^3.3.3333",
     "@types/express": "^4.16.1",
     "@types/node": "^11.11.3",
     "nodemon": "^1.18.10",
-    "ts-node": "^8.0.3",
     "tslint": "^5.14.0",
     "tslint-microsoft-contrib": "^6.1.0",
-    "typescript": "^3.3.3333",
     "@types/request": "2.47.0",
-    "@types/lodash": "4.14.108"
-  },
-  "dependencies": {
+    "@types/lodash": "4.14.108",
     "express": "^4.16.4",
     "fast-csv": "2.4.1",
     "csv-parser": "2.2.0",
